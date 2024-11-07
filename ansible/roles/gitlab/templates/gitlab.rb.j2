@@ -1,0 +1,25 @@
+external_url 'http://gitlab.acneclinic.store'
+
+# Disable built-in nginx
+nginx['enable'] = false
+
+# GitLab will listen on this port
+gitlab_workhorse['listen_addr'] = "0.0.0.0:8181"
+
+# Configure Git user
+user['git_user_email'] = "gitlab@acneclinic.store"
+user['git_user_name'] = "GitLab"
+
+# Configure container registry (optional)
+registry['enable'] = false
+
+# Configure monitoring
+prometheus['enable'] = false
+grafana['enable'] = false
+
+# Configure backup (optional)
+gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"
+gitlab_rails['backup_keep_time'] = 604800
+
+# Allow requests to the local network
+gitlab_rails['outbound_local_requests'] = true

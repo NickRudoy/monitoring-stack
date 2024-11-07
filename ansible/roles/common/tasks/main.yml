@@ -1,0 +1,59 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - ufw
+    state: present
+
+- name: Configure firewall
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - '80'
+    - '9999'
+  when: ansible_distribution == 'Debian'
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: deny
+  when: ansible_distribution == 'Debian'
+
+- name: Allow incoming traffic on port 80
+  ufw:
+    rule: allow
+    direction: in
+    port: '80'
+    proto: tcp
+
+- name: Allow incoming traffic on port 9999
+  ufw:
+    rule: allow
+    direction: in
+    port: '9999'
+    proto: tcp
+
+- name: Create project directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/monitoring
+    - /opt/monitoring/grafana
+    - /opt/monitoring/prometheus
+    - /opt/monitoring/nginx
+    - /opt/gitlab
+    - /opt/plantuml 

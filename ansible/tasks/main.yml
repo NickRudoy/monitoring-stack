@@ -1,0 +1,53 @@
+---
+- name: Create monitoring directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/monitoring
+    - /opt/monitoring/prometheus
+    - /opt/monitoring/grafana
+    - /opt/monitoring/nginx
+    - /opt/monitoring/grafana/provisioning
+    - /opt/monitoring/grafana/dashboards
+
+- name: Copy docker-compose file
+  copy:
+    src: "{{ playbook_dir }}/../docker-compose.yml"
+    dest: /opt/monitoring/docker-compose.yml
+    mode: '0644'
+  notify: restart docker-compose
+
+- name: Copy Prometheus config
+  copy:
+    src: "{{ playbook_dir }}/../configs/prometheus/"
+    dest: /opt/monitoring/prometheus/
+    mode: '0644'
+  notify: restart docker-compose
+
+- name: Copy Nginx config
+  copy:
+    src: "{{ playbook_dir }}/../configs/nginx/conf.d/"
+    dest: /opt/monitoring/nginx/conf.d/
+    mode: '0644'
+  notify: restart docker-compose
+
+- name: Copy Grafana configs
+  copy:
+    src: "{{ playbook_dir }}/../configs/grafana/"
+    dest: /opt/monitoring/grafana/
+    mode: '0644'
+  notify: restart docker-compose
+
+- name: Copy Grafana dashboards
+  copy:
+    src: "{{ playbook_dir }}/../dashboards/"
+    dest: /opt/monitoring/grafana/dashboards/
+    mode: '0644'
+  notify: restart docker-compose
+
+- name: Deploy stack using docker-compose
+  docker_compose:
+    project_src: /opt/monitoring
+    state: present 

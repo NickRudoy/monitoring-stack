@@ -1,0 +1,15 @@
+# IDE files
+.idea/
+.vscode/
+
+# Ansible
+*.retry
+
+# Environment variables
+.env
+
+# Volumes data
+volumes/
+
+# Logs
+*.log 

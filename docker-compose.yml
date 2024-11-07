@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    volumes:
+      - ./configs/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_ROOT_URL=http://metrics.acneclinic.store
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+  nginx:
+    image: nginx:1.25.3
+    ports:
+      - "80:80"
+    volumes:
+      - ./configs/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      - grafana
+      - gitlab
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+  gitlab:
+    image: gitlab/gitlab-ce:17.5.1-ce.0
+    volumes:
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.acneclinic.store'
+        nginx['enable'] = false
+        gitlab_workhorse['listen_addr'] = "0.0.0.0:8181"
+        puma['worker_processes'] = 2
+        puma['worker_timeout'] = 60
+        puma['per_worker_max_memory_mb'] = 1024
+        gitlab_rails['gitlab_shell_ssh_port'] = 22
+        gitlab_rails['time_zone'] = 'UTC'
+        gitlab_rails['env'] = {
+          'MALLOC_ARENA_MAX' => 2
+        }
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+        reservations:
+          memory: 4G
+    shm_size: '256m'
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+  plantuml:
+    image: plantuml/plantuml-server:v1.2023.13
+    ports:
+      - "9999:8080"
+    restart: unless-stopped
+    networks:
+      - monitoring_network
+
+networks:
+  monitoring_network:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data: 

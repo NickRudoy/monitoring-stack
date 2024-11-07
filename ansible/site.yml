@@ -1,0 +1,16 @@
+---
+- name: Setup monitoring and GitLab infrastructure
+  hosts: monitoring_server
+  become: yes
+  roles:
+    - common
+    - docker
+    - monitoring
+    - gitlab
+
+- hosts: monitoring_server
+  become: yes
+  roles:
+    - common
+    - docker
+    - monitoring 

@@ -1,0 +1,38 @@
+---
+- name: Create project directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/monitoring
+    - /opt/monitoring/configs
+    - /opt/monitoring/configs/grafana
+    - /opt/monitoring/configs/prometheus
+    - /opt/monitoring/configs/nginx
+    - /opt/monitoring/dashboards
+
+- name: Copy configuration files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: '../configs/prometheus/prometheus.yml', dest: '/opt/monitoring/configs/prometheus/prometheus.yml' }
+    - { src: '../configs/grafana/grafana.ini', dest: '/opt/monitoring/configs/grafana/grafana.ini' }
+    - { src: '../configs/nginx/default.conf', dest: '/opt/monitoring/configs/nginx/default.conf' }
+    - { src: '../docker-compose.yml', dest: '/opt/monitoring/docker-compose.yml' }
+    - { src: '../dashboards/os_general.json', dest: '/opt/monitoring/dashboards/os_general.json' }
+
+- name: Stop existing containers
+  shell: |
+    cd /opt/monitoring
+    if [ -f docker-compose.yml ]; then
+      docker-compose down
+    fi
+  ignore_errors: yes
+
+- name: Start docker compose
+  shell: |
+    cd /opt/monitoring
+    docker-compose up -d

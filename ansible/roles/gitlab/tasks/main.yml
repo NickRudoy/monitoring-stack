@@ -1,0 +1,17 @@
+---
+- name: Create GitLab directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/gitlab
+    - /opt/gitlab/config
+    - /opt/gitlab/logs
+    - /opt/gitlab/data
+
+- name: Create GitLab configuration
+  template:
+    src: gitlab.rb.j2
+    dest: /opt/gitlab/config/gitlab.rb
+    mode: '0644'
