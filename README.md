@@ -181,6 +181,7 @@ docker-compose logs
 docker-compose logs [сервис] --tail 100
 ```
 ## Структура проекта
+```
 ├── ansible/ # Ansible конфигурация
 │ ├── inventory/ 
 │ └── roles/ # Роли
@@ -192,5 +193,6 @@ docker-compose logs [сервис] --tail 100
 ├── docker-compose.yml # Docker Compose файл
 ├── setup.sh # Скрипт установки
 └── check_versions.sh # Скрипт обновления
+```
 
 
