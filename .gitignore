@@ -7,9 +7,24 @@
 
 # Environment variables
 .env
+.env.local
 
 # Volumes data
 volumes/
+data/
 
 # Logs
-*.log 
+*.log
+logs/
+
+# Local configurations
+configs/prometheus/prometheus.yml
+docker-compose.override.yml
+
+# Backup files
+*.backup
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db 

@@ -1,0 +1,37 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus сам себя
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - системные метрики
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 5s
+    metrics_path: /metrics
+
+  # GitLab метрики (если включены)
+  - job_name: 'gitlab'
+    static_configs:
+      - targets: ['gitlab:9090']
+    scrape_interval: 30s
+    metrics_path: /-/metrics
+    scheme: http
+    # GitLab может не экспортировать метрики по умолчанию
+    # Раскомментируйте если включите в GitLab конфигурации
+
+  # Docker метрики (опционально)
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['host.docker.internal:9323']
+    scrape_interval: 30s
+    # Требует включения Docker metrics API
